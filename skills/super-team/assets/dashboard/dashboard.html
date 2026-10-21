@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Super Team board</title>
+<style>
+:root {
+  --page: #fff; --card: #fff; --ink: #1f2328; --muted: #5c6066; --faint: #a0a4a8;
+  --line: #e0e0dc; --line-soft: #ebebe8; --lane: #f6f6f4; --edge: #5c6066; --code: #f1f1ef;
+  --green: #297950; --blue: #0056c2; --blue-fill: #e1e8f9;
+  --red: #c0352b; --orange: #ad5a1f;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html { background: var(--page); }
+body { margin: 0; color: var(--ink); font: 15px/1.55 var(--sans); -webkit-font-smoothing: antialiased; }
+main { max-width: 1280px; margin: 0 auto; padding: 30px 36px 44px; }
+b { font-weight: 600; }
+a { color: var(--ink); text-underline-offset: 2px; }
+code, pre { font-family: var(--mono); font-size: 12.5px; background: var(--code); border-radius: 4px; }
+code { padding: 1px 5px; }
+.muted { color: var(--muted); }
+.red { color: var(--red); }
+.label { font: 600 13px/1.2 var(--sans); color: var(--muted); margin-bottom: 10px; }
+
+/* header */
+header.top { display: flex; justify-content: space-between; gap: 32px; align-items: flex-start; }
+.eyebrow { font: 500 13px/1 var(--sans); color: var(--muted); }
+.eyebrow .stale { color: var(--orange); }
+h1 { font-size: 36px; line-height: 1.15; margin: 10px 0 6px; letter-spacing: -.02em; font-weight: 700; }
+.lede { color: var(--muted); font-size: 16px; margin: 0; max-width: 760px; }
+.status { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; padding-top: 20px; }
+.pill { border: 1.5px solid var(--blue); color: var(--blue); border-radius: 999px; padding: 6px 15px; font-weight: 600; font-size: 14px; white-space: nowrap; background: var(--card); }
+.pill.quiet { border-color: var(--muted); color: var(--muted); }
+.clock { font: 12.5px var(--mono); color: var(--muted); padding-right: 4px; }
+.needs { margin-top: 22px; background: var(--lane); border-left: 3px solid var(--ink); border-radius: 0 8px 8px 0; padding: 12px 16px; }
+.needs span { color: var(--muted); }
+.needs ul { margin: 4px 0 2px; padding-left: 18px; }
+
+/* now: the latest build and what's left */
+.now { margin-top: 28px; display: grid; grid-template-columns: 320px minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+.now > .wide { grid-column: 1 / -1; max-width: 760px; }   /* no build yet: What's left alone */
+.shot { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border: 1px solid var(--line); border-radius: 8px; background: var(--lane); }
+.tagrow { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.tagrow b { font: 700 26px/1.1 var(--mono); letter-spacing: -.02em; overflow-wrap: anywhere; }
+.line { margin: 10px 0 0; }
+.play { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.btn { font: 600 13px/18px var(--sans); color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; cursor: pointer; text-decoration: none; }
+.btn:hover { border-color: var(--edge); }
+.hint { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
+.howto { margin-top: 14px; font-size: 14px; }
+details.showcmd { margin-top: 4px; font-size: 13px; }
+details.showcmd summary { color: var(--ink); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+ul.facts { list-style: none; margin: 0; padding: 0; }
+ul.facts li { margin: 0 0 8px; }
+ul.facts li.warn { color: var(--red); font-size: 14px; }
+ul.todo { list-style: disc; margin: 4px 0 0; padding-left: 18px; font-size: 14px; }
+ul.todo li { margin: 0 0 3px; }
+ul.todo li::marker { color: var(--faint); }
+.open { margin: 0 0 10px; }
+.open div { display: flex; gap: 8px; align-items: baseline; margin-bottom: 3px; }
+.mk { font-weight: 700; width: 14px; flex-shrink: 0; }
+.mk.fail { color: var(--red); } .mk.untested, .mk.unchecked, .mk.reviewed { color: var(--faint); } .mk.pass { color: var(--muted); }
+
+/* swimlane */
+section { margin-top: 36px; }
+h2 { font-size: 18px; margin: 0; letter-spacing: -.01em; font-weight: 650; }
+.sechead { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
+.swim { padding: 0; overflow: hidden; }   /* lanes and the now band run to the card's edge */
+.swim-body { position: relative; }
+.swim-labels { position: absolute; left: 0; top: 0; width: 136px; }
+.swim-scroll { margin-left: 136px; overflow-x: auto; }
+.lanes { position: relative; }
+.colhead { position: absolute; top: 0; text-align: center; font: 500 12.5px var(--mono); color: var(--muted); white-space: nowrap; }   /* height and line-height: HEAD, set inline */
+.colhead.cur { color: var(--blue); font-weight: 700; }
+.lane { position: absolute; left: 0; right: 0; }
+.lane.tint { background: var(--lane); }
+.lane .who { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); line-height: 1.35; }
+.lane .who b { display: block; font-size: 14px; }
+.lane .who span { display: block; font: 11.5px/1.35 var(--mono); color: var(--muted); }
+.nowband { position: absolute; top: 0; background: rgba(0, 86, 194, .06); border-left: 1px solid rgba(0, 86, 194, .18); border-right: 1px solid rgba(0, 86, 194, .18); z-index: 1; pointer-events: none; }
+.box { position: absolute; z-index: 3; background: var(--card); border: 1.5px solid var(--edge); border-radius: 6px; text-align: center; padding: 3px 5px; display: flex; flex-direction: column; justify-content: center; }
+.box b { font-size: 13.5px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.box span { font: 11px/1.4 var(--mono); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.box em { font: 11.5px/1.35 var(--sans); font-style: normal; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.box.fail { border-color: var(--red); }
+.box.fail span { color: var(--red); }
+.box.cur { border: 2px solid var(--blue); background: var(--blue-fill); }
+.box.todo { border: 1.5px dashed var(--faint); }
+.box.todo b { color: var(--muted); }
+.mark { position: absolute; top: 3px; left: 5px; font: 700 11px/1 var(--sans); font-style: normal; }
+.mark.ok, .mark.part { color: var(--muted); } .mark.bad { color: var(--red); }
+.mark.run { color: var(--blue); animation: pulse 1.6s ease-in-out infinite; }
+.mark.run.stale { animation: none; opacity: .55; }
+@keyframes pulse { 50% { opacity: .35; } }
+svg.edges { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; z-index: 2; }
+.swim-foot { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; margin: 10px 2px 0; }
+.caption { color: var(--muted); font-size: 13.5px; margin: 0; }
+.key { font-weight: 700; } .key.run { color: var(--blue); } .key.bad { color: var(--red); }
+.cue { font: 13px var(--sans); color: var(--muted); white-space: nowrap; }
+.empty { color: var(--muted); font-size: 14px; margin: 0; }
+
+/* details */
+.split { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+ul.checks { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+ul.checks li { display: grid; grid-template-columns: 18px 58px minmax(0, 1fr); gap: 8px; padding: 8px 2px; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+.cid { font: 600 12.5px/1.9 var(--mono); }
+.cid em { display: block; font: 11px/1.2 var(--mono); font-style: normal; color: var(--muted); }
+.why { display: block; color: var(--muted); font-size: 13px; }
+.label.reviewed { margin: 18px 0 8px; }
+details.passed, details.run { margin-top: 10px; }
+details.passed summary, details.run summary { cursor: pointer; color: var(--ink); font-size: 14px; text-decoration: underline; text-underline-offset: 2px; }
+details.passed ul.checks { margin-top: 8px; }
+ul.plain { margin: 0; padding-left: 18px; }
+ul.plain li { margin: 0 0 9px; }
+ul.plain li::marker { color: var(--faint); }
+pre.cmd { margin: 6px 0; padding: 8px 10px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.runcols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; margin-top: 14px; }
+.ref { font: 12.5px var(--mono); color: var(--muted); }
+.dec { list-style: none; padding: 0; margin: 0; }
+.dec li { display: grid; grid-template-columns: 50px minmax(0, 1fr); gap: 6px; color: var(--muted); font-size: 14px; margin: 0 0 6px; }
+.dec time { font: 12.5px/1.9 var(--mono); color: var(--muted); }
+footer { margin-top: 36px; border-top: 1px solid var(--line); padding-top: 16px; color: var(--muted); font-size: 14px; }
+@media (max-width: 900px) {
+  .split, .runcols { grid-template-columns: minmax(0, 1fr); } header.top { flex-direction: column; gap: 12px; } .status { align-items: flex-start; padding-top: 0; }
+  .now { grid-template-columns: 200px minmax(0, 1fr); gap: 24px; } .now > :nth-child(3) { grid-column: 1 / -1; }   /* a small shot beside the latest build, What's left under both */
+}
+@media (max-width: 560px) { main { padding: 22px 16px 36px; } .now { grid-template-columns: 112px minmax(0, 1fr); gap: 16px; } }
+</style>
+</head>
+<body>
+<main>
+  <header class="top" id="hdr"></header>
+  <div id="needs"></div>
+  <section class="now" id="now"></section>
+  <section>
+    <div class="sechead"><h2>How we got here</h2></div>
+    <div class="card swim">
+      <div class="swim-body"><div class="swim-labels" id="swim-labels"></div><div class="swim-scroll" id="swim-scroll"><div class="lanes" id="lanes"></div></div></div>
+    </div>
+    <div class="swim-foot"><p class="caption">The build, then one column per improvement round, then ship. <span class="key">✓</span> done · <span class="key run">●</span> running · <span class="key bad">✗</span> malformed · <span class="key">○</span> items left open · grey dashed: not started.</p><span class="cue" id="cue"></span></div>
+  </section>
+  <section id="acc"></section>
+  <section class="split" id="more"></section>
+  <footer id="foot"></footer>
+</main>
+<script src="state.js"></script>
+<script>
+// Super Team board. Everything comes from team/state.js: state.derived is rebuilt from files on disk by team/tools/state.mjs
+// on every st command and gate run (references/dashboard.md). Times are recomputed with the clock on every render, so a board
+// without the refresh loop stays current between writes.
+let NOW = Date.now(), firstDraw = true;
+let S, D, plan, left, gate, rounds, lastRound, round, K, MAX, build, phase, MODE, MODE_NAME, name, pitch, needs, acc, passed, bars, STALE, running;
+const openKeys = new Set();                       // disclosures the owner opened stay open through the 10-second redraw
+const el = (id) => document.getElementById(id);
+const esc = (t) => String(t == null ? '' : t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const tms = (iso) => { const v = Date.parse(iso); return Number.isFinite(v) ? v : null; };
+const hm = (iso) => { const v = tms(iso); if (v == null) return ''; const d = new Date(v); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
+const dur = (ms) => { if (ms == null || !Number.isFinite(ms)) return '—'; const m = Math.max(0, Math.round(ms / 60000)); return (m >= 60 ? Math.floor(m / 60) + 'h ' : '') + (m % 60) + 'm'; };
+const mins = (ms) => Math.max(0, Math.floor(ms / 60000));
+const cap = (t) => t ? String(t).charAt(0).toUpperCase() + String(t).slice(1) : '';
+const sentence = (t) => /[.?!:]$/.test(t) ? t : t + '.';
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+const num = (v) => typeof v === 'number' && Number.isFinite(v);
+const isObj = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
+const obj = (v) => (isObj(v) ? v : {});
+const arr = (v) => (Array.isArray(v) ? v : []);
+const det = (key, cls) => `<details class="${cls}" data-key="${key}"${openKeys.has(key) ? ' open' : ''}>`;
+const PHASES = ['planning', 'building', 'improving', 'wrapping', 'done', 'paused'];
+// The phase as state.mjs derives it, for a state.js without derived (an older team/): planning lasts until the plan is approved.
+const phaseOf = (s) => { const p = typeof s.phase === 'string' ? s.phase.trim().toLowerCase() : ''; return PHASES.includes(p) && p !== 'planning' ? p : obj(s.plan).approved === true ? 'building' : 'planning'; };
+const unset = (v) => !v || /^(default|current)\b/i.test(String(v).trim());   // every role needs a model and an effort chosen on purpose
+const roleWarn = (m) => (!m.role ? '' : unset(m.model) ? 'model not set' : unset(m.effort) ? 'effort not set' : '');
+
+function load(state, nowMs) {
+  NOW = nowMs;
+  S = obj(state); D = obj(S.derived);
+  plan = obj(S.plan); left = obj(D.left); gate = obj(left.gate);
+  rounds = arr(D.rounds).filter((r) => isObj(r) && num(r.n)).sort((a, b) => a.n - b.n);
+  lastRound = rounds[rounds.length - 1] || null;
+  round = obj(D.round); K = num(round.k) ? round.k : 0; MAX = Number.isInteger(round.max) ? round.max : null;
+  build = isObj(D.build) && D.build.tag ? D.build : null;
+  phase = PHASES.includes(D.phase) ? D.phase : phaseOf(S);
+  // The two modes, plus the names before v0.9.
+  const was = { 'claude-eng': 'super-engineer', 'tl-solo': 'super-engineer', 'claude-team': 'super-team', team: 'super-team', 'claude-solo': 'claude-only', 'codex-solo': 'codex-only' };
+  const NAMES = { 'super-engineer': 'Super Engineer', 'super-team': 'Super Team (experimental)', 'claude-only': 'Claude only', 'codex-only': 'Codex only' };
+  MODE_NAME = NAMES[was[plan.mode] || plan.mode] || '';
+  MODE = MODE_NAME ? was[plan.mode] || plan.mode : 'super-engineer';
+  const headline = typeof plan.headline === 'string' ? plan.headline : '';
+  name = headline.split(':')[0].trim() || 'Untitled project';
+  pitch = headline.includes(':') ? headline.slice(headline.indexOf(':') + 1).trim() : '';
+  needs = arr(S.needsYou).filter((x) => typeof x === 'string' && x.trim());
+  acc = arr(left.acceptance).filter((a) => isObj(a) && a.id);
+  passed = acc.filter((a) => a.status === 'pass');
+  bars = arr(S.timeline).filter(isObj);
+  STALE = phase !== 'done' && tms(S.updatedAt) != null && NOW - tms(S.updatedAt) > 10 * 60000;   // no new state for 10 min
+  running = phase !== 'paused';
+}
+
+function renderHeader() {
+  const pill = phase === 'done' ? ['quiet', 'Run complete'] : phase === 'paused' ? ['quiet', 'Paused'] : phase === 'wrapping' ? ['', 'Wrapping up']
+    : phase === 'improving' ? ['', `Improving · round ${K}${MAX ? ` of ${MAX}` : ' · no round cap'}`] : phase === 'building' ? ['', 'Building'] : ['', 'Planning'];
+  const clock = phase === 'done' && tms(S.updatedAt) != null ? `ended at ${hm(S.updatedAt)}` : '';
+  el('hdr').innerHTML = `<div>
+      <div class="eyebrow">${MODE_NAME ? `${esc(MODE_NAME)} · ` : ''}${esc(name)} · ${STALE ? `<span class="stale">last report ${hm(S.updatedAt)}</span>` : `updated ${hm(S.updatedAt)}`}</div>
+      <h1>${esc(name)}</h1>
+      ${pitch ? `<p class="lede">${esc(sentence(cap(pitch)))}</p>` : ''}</div>
+    <div class="status"><div class="pill ${pill[0]}">${pill[1]}</div>${clock ? `<div class="clock">${clock}</div>` : ''}</div>`;
+  const seenNeed = new Set(), items = needs.map((n) => n.trim()).filter((n) => !seenNeed.has(n.toLowerCase()) && seenNeed.add(n.toLowerCase()));
+  el('needs').innerHTML = items.length ? `<div class="needs"><b>Needs your decision</b><ul>${items.map((n) => `<li>${esc(sentence(n))}</li>`).join('')}</ul><span>Reply in the running session.</span></div>` : '';
+}
+
+// ---- what's left -----------------------------------------------------------------------------------------------
+function roundsLine() {
+  if (MAX == null) return K ? `Round ${K}, no round cap.` : 'No round cap.';
+  if (!K) return `Up to ${plural(MAX, 'improvement round')} after the build.`;
+  return K < MAX ? `Round ${K} of ${MAX}: up to ${MAX - K} more.` : K === MAX ? `Round ${K} of ${MAX}, the last round.` : `Round ${K}, over the round cap of ${MAX}.`;
+}
+function nowLine() {                                 // what is happening now, from derived.activity; the waits use the clock
+  const a = isObj(D.activity) ? D.activity : { kind: phase === 'improving' ? 'no-round' : phase };
+  const since = (t) => tms(t) != null ? `, since ${hm(t)} (${dur(NOW - tms(t))})` : '';
+  let line = '';
+  if (a.kind === 'planning') line = 'planning: waiting for your approval of the plan.';
+  else if (a.kind === 'building') line = `building${since(a.since || plan.approvedAt)}.`;
+  else if (a.kind === 'no-round') line = 'improving: no round has started yet.';
+  else if (a.kind === 'waiting-feedback') line = `round ${esc(a.round)}: waiting for feedback${since(a.since)}.`;
+  else if (a.kind === 'waiting-response') line = `round ${esc(a.round)}: waiting for the response (feedback at ${hm(a.since)}).`;
+  else if (a.kind === 'items-open') line = `round ${esc(a.round)}: ${a.open ? `${plural(a.open, 'item')} open` : 'no items open'}.`;
+  else if (a.kind === 'wrapping') line = 'wrapping up: checking the latest build and writing the report.';
+  else if (a.kind === 'paused') line = 'paused.';
+  if (!line) return '';                              // done: nothing is happening
+  const tasks = bars.filter((b) => b.end === null || b.end === undefined).map((b) => `${esc(b.label)} (${esc(b.agent)})`);
+  return line + (tasks.length ? ` Open tasks: ${tasks.slice(0, 4).join(', ')}${tasks.length > 4 ? `, +${tasks.length - 4} more` : ''}.` : '');
+}
+// What the board can check on its own (references/dashboard.md, Warnings), with the clock.
+function warnings() {
+  const w = [], resting = phase === 'done' || phase === 'paused';
+  if (STALE && !['planning', 'paused'].includes(phase)) w.push(`No new state for ${mins(NOW - tms(S.updatedAt))} min (last report ${hm(S.updatedAt)}): the TL may be stalled. Look at its session.`);
+  const end = tms(S.endsAt);
+  if (end != null && end < NOW && (phase === 'building' || phase === 'improving')) w.push(`The time limit passed at ${hm(S.endsAt)}: ship the latest build and wrap up (st set phase wrapping).`);
+  const lr = lastRound;
+  if (!resting && lr && tms(lr.request) != null && !lr.feedback && NOW - tms(lr.request) > 40 * 60000) w.push(`R${esc(lr.n)} has had no feedback for ${mins(NOW - tms(lr.request))} min since its request (reviewer silent?).`);
+  const fbAt = lr && isObj(lr.feedback) ? tms(lr.feedback.time) : null;
+  if (!resting && fbAt != null && !lr.response && NOW - fbAt > 30 * 60000) w.push(`R${esc(lr.n)}'s feedback came ${mins(NOW - fbAt)} min ago and has no response yet.`);
+  if (phase === 'improving' && MAX && K > MAX) w.push(`R${K} is over the round cap of ${MAX}: wrap up.`);   // the last allowed round (K = MAX) is no warning
+  const tl = obj(S.tl), wake = tms(tl.nextWakeAt);
+  if (!resting && wake != null && NOW - wake > 10 * 60000) w.push(`The TL missed its ${hm(tl.nextWakeAt)} check-in and may be stalled: look at its session.`);
+  const bad = arr(D.malformed).filter(isObj);
+  if (bad.length) w.push(`${bad.length === 1 ? 'A feedback file is' : bad.length + ' feedback files are'} not counted: ${bad.slice(0, 4).map((m) => 'R' + esc(m.round) + (m.reason ? ' (' + esc(m.reason) + ')' : '')).join('; ')}${bad.length > 4 ? '; +' + (bad.length - 4) + ' more' : ''}. Fix the front matter.`);
+  return w;
+}
+
+function renderNow() {
+  const shot = build ? (build.hero ? `<a href="${esc(build.hero)}" title="Open the full screenshot"><img class="shot" src="${esc(build.hero)}" alt="${esc(build.tag)}"></a>` : '<div class="shot"></div>') : '';
+  let mid = '';                                   // no Latest build panel until there is a build
+  if (build) {
+    const serve = isObj(build.serve) && build.serve.cmd ? build.serve : null;
+    const how = serve
+      ? `<div class="play"><button class="btn" data-copy="${esc(serve.cmd)}">Copy start command</button><a class="btn" href="${esc(serve.url)}">Open latest build</a></div>
+         <p class="hint">Run the command in a terminal from the project folder, then open the build.</p>
+         ${det('cmd', 'showcmd')}<summary>Show command</summary><pre class="cmd">${esc(serve.cmd)}</pre></details>`
+      : `<p class="howto">How to run: see <a href="${esc(build.notesFile || `builds/${build.tag}/NOTES.md`)}">team/builds/${esc(build.tag)}/NOTES.md</a></p>`;
+    mid = `<div><div class="label">Latest build</div>
+      <div class="tagrow"><b>${esc(build.tag)}</b>${tms(build.time) != null ? `<span class="muted">frozen at ${hm(build.time)}</span>` : ''}</div>
+      ${build.notes ? `<p class="line">${esc(cap(build.notes))}</p>` : ''}
+      ${how}</div>`;
+  }
+  const items = [];
+  if (phase !== 'done') {
+    const end = tms(S.endsAt);
+    const start = tms(S.startedAt);
+    // While planning, the limit hasn't started: it runs from the plan's approval, which sets endsAt again (start-up.md §7).
+    items.push(end == null ? '<li>No time limit.</li>'
+      : phase === 'planning' && start != null && end > start ? `<li>Time limit <b>${dur(end - start)}</b>, counted from the plan's approval.</li>`
+      : end > NOW ? `<li><b>${dur(end - NOW)}</b> left (time limit ${hm(S.endsAt)}).</li>` : `<li>The time limit (${hm(S.endsAt)}) has passed.</li>`);
+    items.push(`<li>${roundsLine()}</li>`);
+  }
+  const o = isObj(left.open) ? left.open : null, todo = o ? arr(o.items) : [];
+  if (o) items.push(todo.length ? `<li><b>Open in R${esc(o.round)}'s response</b> (${todo.length}):<ul class="todo">${todo.slice(0, 8).map((t) => `<li>${esc(t || '(no text)')}</li>`).join('')}${todo.length > 8 ? `<li class="muted">+${todo.length - 8} more</li>` : ''}</ul></li>`
+    : `<li>R${esc(o.round)}'s response has no open items.</li>`);
+  let opens = '';
+  const settle = acc.filter((a) => a.status !== 'reviewed');   // the lines a gate or the owner can settle; [judge] lines are the reviewer's call
+  if (settle.length) {                            // the acceptance summary: what passes on the latest build, then what is still open
+    const fails = settle.filter((a) => a.status === 'fail'), untested = settle.filter((a) => a.status === 'untested').length, unchecked = settle.filter((a) => a.status === 'unchecked').length;
+    items.push(`<li><b>${build ? esc(build.tag) : 'No build yet'}</b> · ${settle.filter((a) => a.status === 'pass').length}/${settle.length} acceptance lines pass</li>`);
+    const label = (a) => `${esc(cap(a.tag))} (${esc(a.id)})`;
+    opens = fails.slice(0, 5).map((a) => `<div><span class="mk fail">✗</span><span>${label(a)} <span class="muted">fails</span></span></div>`).join('')
+      + (fails.length > 5 ? `<div><span class="mk fail">✗</span><span class="muted">${fails.length - 5} more failing (Acceptance below)</span></div>` : '')
+      + (untested ? `<div><span class="mk untested">○</span><span class="muted">${untested} untested</span></div>` : '')
+      + (unchecked ? `<div><span class="mk unchecked">–</span><span class="muted">${unchecked} not checked by a gate</span></div>` : '');
+  } else if (acc.length) items.push('<li class="muted">Every acceptance line is reviewed in the feedback rounds (no scores in v0.11).</li>');
+  else items.push(`<li class="muted">${left.specNote ? esc(sentence(cap(left.specNote))) : left.specFound ? `${esc(left.acceptancePath || left.specPath)} has no acceptance lines yet.` : `No spec found at ${esc(left.specPath || 'docs/game-spec/SPEC.md')} (st set spec).`}</li>`);
+  const tail = [];
+  const nl = nowLine(); if (nl) tail.push(`<li><b>Now:</b> ${nl}</li>`);
+  for (const w of warnings()) tail.push(`<li class="warn">${w}</li>`);
+  el('now').innerHTML = `${shot}${mid}<div class="${build ? '' : 'wide'}"><div class="label">What's left</div>
+    <ul class="facts">${items.join('')}</ul>
+    ${opens ? `<div class="open"><div class="hint" style="margin:0 0 2px">Still open</div>${opens}</div>` : ''}
+    <ul class="facts">${tail.join('')}</ul></div>`;
+}
+
+// ---- swimlane: the build, then one column per round, then ship ----
+const HEAD = 36;                                  // the column-label row; labels are centred in it
+const MAX_COL = 240;
+// The plan.team rows the TL and Reviewer lanes stand for: the first row naming a reviewer (review, judge, critic), and the first other
+// row naming the TL (TL, tech lead), else one naming a lead, an engineer or a builder. Rows run by no CLI ("cli": "-") draw no lane.
+// The other rows are listed under Run details.
+function laneRows() {
+  const team = arr(plan.team).filter(isObj), rows = team.filter((t) => t.cli !== '-');
+  const rev = rows.find((t) => /review|judge|critic/i.test(String(t.role || ''))) || null;
+  const rest = rows.filter((t) => t !== rev);
+  const tl = rest.find((t) => /\bTL\b|tech lead/i.test(String(t.role || ''))) || rest.find((t) => /lead|engineer|build/i.test(String(t.role || ''))) || null;
+  return { team, tl, rev };
+}
+function lanesFor() {
+  const { tl, rev } = laneRows();
+  const sub = (m) => [m.who, unset(m.model) ? '' : m.model].filter(Boolean).join(' · ').toLowerCase();
+  const eff = (m) => unset(m.effort) ? '' : `effort ${m.effort}`;
+  const t = tl || {}, r = rev || {};
+  return [
+    { id: 'you', who: 'You', sub: 'approver', h: 64 },
+    { id: 'tl', who: 'TL', sub: sub(t) || (MODE === 'codex-only' ? 'codex' : 'builds'), effort: eff(t), warn: roleWarn(t), h: 84 },
+    { id: 'rev', who: 'Reviewer', sub: sub(r) || 'reviews each round', effort: eff(r), warn: roleWarn(r), h: 96 },
+  ].map((l, i) => ({ ...l, tint: i % 2 === 0 }));
+}
+function swimModel() {
+  const cols = [{ label: 'build' }];
+  rounds.forEach((r) => cols.push({ label: `R${r.n}${tms(r.request) != null ? ' · ' + hm(r.request) : ''}` }));
+  const shipCol = cols.length; cols.push({ label: 'ship' });
+  // The column in progress. A paused run keeps its place (before the build ends, or round k) but nothing runs.
+  const pos = phase === 'paused' ? (tms(S.buildDoneAt) != null ? 'improving' : 'building') : phase;
+  const kCol = K ? rounds.findIndex((r) => r.n === K) + 1 : 0;
+  const curCol = pos === 'planning' || pos === 'building' ? 0 : pos === 'improving' ? (kCol > 0 ? kCol : -1) : pos === 'wrapping' ? shipCol : -1;
+  if (curCol >= 0) cols[curCol].cur = true;
+  const boxes = [], edges = [];
+  const box = (b) => { boxes.push(b); return b.id; };
+  const edge = (from, to, kind, route) => edges.push({ from, to, kind, route });
+  const live = (kind) => (kind === 'cur' && !running ? 'todo' : kind);   // a paused run waits instead of running
+  const approved = plan.approved === true;
+  box({ id: 'approve', lane: 'you', col: 0, title: 'Approve plan', sub: plan.approvedAt ? 'at ' + hm(plan.approvedAt) : approved ? 'approved' : 'waiting', kind: approved ? '' : live('cur') });
+  // The Build bar: from the plan's approval to the end of the build (buildDoneAt), or to now while it runs.
+  const b0 = tms(plan.approvedAt), b1 = tms(S.buildDoneAt);
+  const bKind = phase === 'planning' ? 'todo' : pos === 'building' ? live('cur') : '';
+  const bSub = b0 == null ? (phase === 'planning' ? 'after approval' : '') : b1 != null ? `${hm(plan.approvedAt)}–${hm(S.buildDoneAt)} · ${dur(b1 - b0)}`
+    : pos === 'building' ? `since ${hm(plan.approvedAt)} · ${dur(NOW - b0)}` : `from ${hm(plan.approvedAt)}`;
+  box({ id: 'build', lane: 'tl', col: 0, title: 'Build', sub: bSub, kind: bKind });
+  edge('approve', 'build', approved ? 'flow' : 'pending');
+  let prev = 'build';
+  rounds.forEach((r, i) => {
+    const c = i + 1, fb = isObj(r.feedback) ? r.feedback : null, rs = isObj(r.response) ? r.response : null;
+    const inPlay = r === lastRound && ['improving', 'wrapping', 'paused'].includes(phase);   // the round still being worked
+    let f;                                       // feedback, in the reviewer's lane: reviewer, items, bugs and the body's first line
+    if (fb && fb.ok) f = { title: `${plural(fb.items, 'item')} · ${plural(fb.bugs, 'bug')}`, sub: String(fb.reviewer || ''), line: fb.summary || '', tip: fb.summary || '', kind: '' };
+    else if (fb) f = { title: 'Feedback malformed', sub: fb.reason || '', tip: fb.reason || '', kind: 'fail' };
+    else if (inPlay && tms(r.request) != null) f = { title: 'Waiting for feedback', sub: 'since ' + hm(r.request), kind: live('cur') };
+    else f = { title: 'No feedback', sub: '', kind: 'todo' };
+    const fid = box({ id: 'f' + c, lane: 'rev', col: c, h: 64, ...f });
+    let p;                                       // the TL's response, in the TL's lane: done, to do and declined
+    if (rs) p = { title: `${rs.done} done · ${rs.todo} to do`, sub: `${rs.declined} declined`, tip: arr(rs.open).length ? 'To do: ' + arr(rs.open).join('; ') : '', kind: rs.todo ? (inPlay ? live('cur') : 'part') : '' };
+    else if (fb && inPlay) p = { title: 'Response', sub: 'waiting', kind: live('cur') };
+    else p = { title: 'Response', sub: fb ? 'none' : 'after feedback', kind: 'todo' };
+    const pid = box({ id: 'p' + c, lane: 'tl', col: c, ...p });
+    edge(prev, fid, 'flow');
+    edge(fid, pid, rs ? 'flow' : 'pending');
+    prev = pid;
+  });
+  const signed = !!build && isObj(S.owner) && S.owner.signoff === build.tag;
+  box({ id: 'ship', lane: 'you', col: shipCol, title: build ? 'Ship ' + build.tag : 'Ship', sub: signed ? 'signed off' : phase === 'done' ? 'shipped' : build ? 'latest build' : 'no build yet',
+    kind: phase === 'done' ? '' : phase === 'wrapping' ? live('cur') : 'todo' });
+  edge(prev, 'ship', phase === 'done' ? 'flow' : 'pending', 'up');
+  return { cols, boxes, edges };
+}
+const STROKE = { flow: ['#5c6066', ''], pending: ['#a0a4a8', '4 4'] };
+function cue(scroller, out, what) {                 // say when a strip scrolls, and which way
+  if (!scroller || !out) return;
+  const update = () => {
+    const room = (scroller.scrollWidth || 0) - (scroller.clientWidth || 0);
+    out.textContent = room < 3 ? '' : scroller.scrollLeft < 4 ? `Scroll for later ${what} →` : scroller.scrollLeft > room - 4 ? `← Scroll for earlier ${what}` : `← Scroll for more ${what} →`;
+  };
+  scroller.onscroll = update; update();
+}
+function drawSwim() {
+  const scroll = el('swim-scroll'), host = el('lanes'), labelsEl = el('swim-labels');
+  const L = lanesFor(), avail = scroll.clientWidth || 1000, MIN_COL = avail < 950 ? 150 : 164;
+  const { cols, boxes, edges } = swimModel();
+  const colW = Math.max(MIN_COL, Math.min(MAX_COL, avail / cols.length)), BW = Math.min(170, colW - 24);   // few columns don't stretch
+  const fitCols = Math.max(1, Math.floor(avail / colW));
+  const W = Math.max(avail, cols.length * colW + (cols.length > fitCols ? avail - fitCols * colW : 0));   // trailing room, so a scrolled view starts on a column
+  const top = {}, laneH = {}; let H = HEAD;
+  L.forEach((l) => { top[l.id] = H; laneH[l.id] = l.h; H += l.h; });
+  labelsEl.style.height = H + 'px';
+  labelsEl.innerHTML = L.map((l) => `<div class="lane ${l.tint ? 'tint' : ''}" style="top:${top[l.id]}px;height:${l.h}px"><div class="who"><b>${esc(l.who)}</b><span>${esc(l.sub)}</span>${l.warn ? `<span class="red">${l.warn}</span>` : l.effort ? `<span>${esc(l.effort)}</span>` : ''}</div></div>`).join('');
+  host.style.width = W + 'px'; host.style.height = H + 'px';
+  let html = '';
+  cols.forEach((c, i) => { html += `<div class="colhead ${c.cur ? 'cur' : ''}" style="left:${i * colW}px;width:${colW}px;height:${HEAD}px;line-height:${HEAD}px">${esc(c.label)}${c.cur ? ' · now' : ''}</div>`; });
+  L.forEach((l) => { html += `<div class="lane ${l.tint ? 'tint' : ''}" style="top:${top[l.id]}px;height:${l.h}px"></div>`; });
+  const curCol = cols.findIndex((c) => c.cur);
+  if (curCol >= 0) html += `<div class="nowband" style="left:${curCol * colW}px;width:${colW}px;height:${H}px"></div>`;
+  const MARK = (k) => /\bcur\b/.test(k) ? `<i class="mark run${STALE ? ' stale' : ''}" title="${STALE ? 'running at the last report, ' + hm(S.updatedAt) : 'running'}">●</i>`
+    : /\bfail\b/.test(k) ? '<i class="mark bad" title="malformed">✗</i>' : /\btodo\b/.test(k) ? '' : /\bpart\b/.test(k) ? '<i class="mark part" title="items left open">○</i>' : '<i class="mark ok" title="done">✓</i>';
+  const at = {};
+  boxes.forEach((b) => {
+    const bh = b.h || (b.lane === 'you' ? 42 : 50), w = BW;
+    const x = Math.round(b.col * colW + (colW - BW) / 2), y = Math.round(top[b.lane] + (laneH[b.lane] - bh) / 2);
+    at[b.id] = { x, y, w, h: bh, cx: x + w / 2, cy: y + bh / 2 };
+    const inner = `<b>${esc(b.title)}</b>${b.sub ? `<span>${esc(b.sub)}</span>` : ''}${b.line ? `<em>${esc(b.line)}</em>` : ''}`;
+    html += `<div class="box ${b.kind || ''}" style="left:${x}px;top:${y}px;width:${w}px;height:${bh}px" title="${esc(b.tip || b.sub || b.title)}">${MARK(b.kind || '')}${inner}</div>`;
+  });
+  let paths = '';
+  edges.forEach((e) => {
+    const a = at[e.from], b = at[e.to]; if (!a || !b) return;
+    let d;
+    if (e.route === 'up') {                          // to the ship column, a higher lane: along a's row, then up into b, right of centre
+      const x = Math.round(b.x + b.w * 0.72);
+      d = `M${a.x + a.w},${a.cy} H${x} V${b.y + b.h + 1}`;
+    } else if (Math.abs(a.cx - b.cx) < 2) d = b.y > a.y ? `M${a.cx},${a.y + a.h} V${b.y - 1}` : `M${a.cx},${a.y} V${b.y + b.h + 1}`;   // same column: feedback up to the response
+    else {                                             // next column: into the gutter, to b's row, then in
+      const x = (a.x + a.w + b.x) / 2;
+      d = `M${a.x + a.w},${a.cy} H${x} V${b.cy} H${b.x - 1}`;
+    }
+    const [color, dash] = STROKE[e.kind];
+    paths += `<path d="${d}" fill="none" stroke="${color}" stroke-width="1.25" ${dash ? `stroke-dasharray="${dash}"` : ''} marker-end="url(#h-${e.kind})"/>`;
+  });
+  const marker = (k) => `<marker id="h-${k}" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${STROKE[k][0]}"/></marker>`;
+  host.innerHTML = html + `<svg class="edges" width="${W}" height="${H}"><defs>${Object.keys(STROKE).map(marker).join('')}</defs>${paths}</svg>`;
+  if (firstDraw) { scroll.scrollLeft = Math.max(0, cols.length - fitCols) * colW; firstDraw = false; }   // the newest columns in view
+  cue(scroll, el('cue'), 'rounds');
+}
+
+function renderAcceptance() {
+  const mk = { pass: '✓', fail: '✗', untested: '○', unchecked: '–', reviewed: '·' };
+  const why = { pass: 'pass', fail: 'fail', untested: 'untested', unchecked: 'not checked by a gate', reviewed: 'reviewed in the feedback rounds' };
+  const failing = acc.filter((a) => a.status === 'fail'), untested = acc.filter((a) => a.status === 'untested'), unchecked = acc.filter((a) => a.status === 'unchecked');
+  const reviewed = acc.filter((a) => a.status === 'reviewed'), settled = acc.length - reviewed.length;
+  const row = (a) => `<li class="acc-${esc(a.status)}"><span class="mk ${esc(a.status)}">${mk[a.status] || '○'}</span><span class="cid">${esc(a.id)}${String(a.tag).toLowerCase() === String(a.id).toLowerCase() ? '' : `<em>${esc(a.tag)}</em>`}</span><span>${esc(a.text)}<span class="why">${esc(why[a.status] || a.status)}${a.note ? ' (' + esc(a.note) + ')' : ''}${a.skipped && a.status === 'untested' ? ' (check skipped)' : ''}</span></span></li>`;
+  const group = (key, list, label) => list.length ? `${det(key, 'passed')}<summary>${list.length} ${label}: view checks</summary><ul class="checks">${list.map(row).join('')}</ul></details>` : '';
+  const ev = !gate.checked ? 'no gate results yet, so the lines are not checked by a gate (the gate is optional).'
+    : gate.evidence ? `statuses come from the gate run on <code>${esc(gate.evidence.short)}</code> (${esc(gate.evidence.ref)}), the latest build.`
+    : gate.note ? esc(gate.note) : build ? 'no gate run matches the latest build yet.' : 'no build yet, so no gate result is tied to one.';
+  const c = isObj(gate.candidate) ? gate.candidate : null;
+  const cn = c ? ` The newest candidate, <code>${esc(c.short)}</code> (${esc(c.ref)}), ${c.verdict === 'failed' ? `fails ${esc(arr(c.failedChecks).join(', ') || c.failed + ' check(s)')}${c.failNote ? ': ' + esc(c.failNote) : ''}` : 'passes'}.` : '';
+  const unnumbered = num(left.unnumbered) && left.unnumbered ? `<li>${left.unnumbered} tagged spec line${left.unnumbered === 1 ? ' has' : 's have'} no A&lt;n&gt; id and ${left.unnumbered === 1 ? 'is' : 'are'} not tracked.</li>` : '';
+  el('acc').innerHTML = `<div class="sechead"><h2>Acceptance</h2></div><div class="split"><div>
+      ${acc.length ? `${failing.length ? `<ul class="checks">${failing.map(row).join('')}</ul>` : settled ? `<p class="empty">${passed.length ? 'Nothing failing.' : 'Nothing passes or fails yet.'}</p>` : ''}
+      ${group('untested', untested, 'untested')}${group('unchecked', unchecked, 'not checked by a gate')}${group('passed', passed, 'passed')}
+      ${reviewed.length ? `<div class="label reviewed">Reviewed in the feedback rounds (no scores in v0.11)</div><ul class="checks">${reviewed.map(row).join('')}</ul>` : ''}`
+      : `<p class="empty">No acceptance lines found in ${esc(left.acceptancePath || left.specPath || 'docs/game-spec/SPEC.md')} (lines like "- [bot] A1: …").</p>`}</div>
+    <ul class="plain"><li><b>Gate:</b> ${ev}${cn}</li>${unnumbered}</ul></div>`;
+}
+
+function renderMore() {
+  const agents = arr(S.agents).filter(isObj);
+  const { team, tl, rev } = laneRows();
+  const others = team.filter((t) => t !== tl && t !== rev);   // the roles with no lane of their own
+  const roleRow = (t) => { const ran = t.cli !== '-', w = ran ? roleWarn(t) : '';
+    return `<li><b>${esc(t.role || t.who)}</b> <span class="ref">${esc([t.who, ran && !unset(t.model) ? t.model : ''].filter(Boolean).join(' · ').toLowerCase())}${ran && !unset(t.effort) ? ` · effort ${esc(t.effort)}` : ''}</span>${w ? ` <span class="red">${w}</span>` : ''}${t.why ? `<br>${esc(cap(t.why))}` : ''}</li>`; };
+  const people = agents.map((a) => `<li><b>${esc(a.role || a.name)}</b> <span class="ref">${esc(a.cli)} · ${esc(a.model)}${a.effort ? ` · effort ${esc(a.effort)}` : ''}</span><br><span class="muted">${esc(a.status)} ·</span> ${esc(a.task)}</li>`).join('') + others.map(roleRow).join('');
+  const quota = arr(S.quota).filter(isObj);
+  const windows = (q) => [num(q.fiveHourLeft) ? `${q.fiveHourLeft}% of the 5-hour window` : '', num(q.weekLeft) ? `${q.weekLeft}% of the week` : ''].filter(Boolean);   // some plans have only a weekly window
+  const usage = quota.map((q) => `<li><b>${esc(cap(q.cli))}</b> <span class="ref">${esc(q.model)} · checked ${hm(q.checkedAt)}</span><br>${windows(q).length ? windows(q).join(', ') + ' left' : 'unavailable'}</li>`).join('');
+  const decs = (Array.isArray(D.decisions) ? D.decisions : arr(S.decisions)).filter((d) => isObj(d) && d.text != null && String(d.text).trim());
+  const dec = decs.slice().reverse().slice(0, 4).map((d) => `<li><time>${hm(d.at)}</time><span>${esc(d.text)}</span></li>`).join('');
+  el('more').innerHTML = `<div>${dec ? `<div class="sechead"><h2>Decisions</h2></div><ul class="dec">${dec}</ul>` : ''}</div>
+    <div><div class="sechead"><h2>Run details</h2></div>${det('run', 'run')}<summary>Team, effort and plan usage</summary><div class="runcols"><div><div class="label">Team</div><ul class="plain">${people || '<li class="muted">No agents recorded (st agent).</li>'}</ul></div><div><div class="label">Plan usage</div><ul class="plain">${usage || '<li class="muted">No meter read yet (st quota).</li>'}</ul></div></div></details></div>`;
+  const tlState = obj(S.tl);
+  const shortUsage = quota.filter((q) => windows(q).length).map((q) => `${esc(cap(q.cli))} ${windows(q)[0]}`).join(', ');   // the shortest window each pool has
+  const links = arr(S.links).filter((l) => isObj(l) && /^(https?:\/\/|[^:]+$)/i.test(String(l.href || '')));   // relative to team/, or http(s)
+  el('foot').innerHTML = `${phase === 'done' ? 'The run has ended.' : tlState.nextWakeAt ? `Next check-in at ${hm(tlState.nextWakeAt)}.` : ''} ${S.startedAt ? `Started at ${hm(S.startedAt)}` : ''}${tms(S.endsAt) != null && phase !== 'planning' ? `; time limit ${hm(S.endsAt)}` : ''}.${shortUsage ? ` Plan usage left: ${shortUsage}.` : ''}${links.length ? ` Files: ${links.map((l) => `<a href="${esc(l.href)}">${esc(l.label || l.href)}</a>`).join(', ')}.` : ''}`;
+}
+
+function renderBoard(state, now) {
+  load(state, now instanceof Date ? now.getTime() : Date.now());
+  renderHeader(); renderNow(); drawSwim(); renderAcceptance(); renderMore();
+}
+// Copy buttons: the clipboard API, with a textarea fallback for pages opened as file://
+function copyCmd(btn) {
+  const text = btn.getAttribute('data-copy'), label = btn.textContent;
+  const done = () => { btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = label; }, 1500); };
+  const fallback = () => { const t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select(); try { if (document.execCommand('copy')) done(); } catch (_) {} if (t.remove) t.remove(); else document.body.removeChild(t); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback); else fallback();
+}
+function reloadState() {                            // re-read state.js without a page reload
+  const s = document.createElement('script');
+  s.src = `state.js?t=${Date.now()}`;
+  s.onload = s.onerror = () => { if (s.remove) s.remove(); renderBoard(window.TEAM_STATE || {}); };
+  document.head.appendChild(s);
+}
+if (document.addEventListener) {
+  document.addEventListener('click', (e) => { const b = e.target && e.target.closest && e.target.closest('[data-copy]'); if (b) copyCmd(b); });
+  document.addEventListener('toggle', (e) => { const d = e.target, k = d && d.getAttribute && d.getAttribute('data-key'); if (k) { if (d.open) openKeys.add(k); else openKeys.delete(k); } }, true);   // toggle doesn't bubble: capture it
+}
+window.addEventListener('resize', () => renderBoard(window.TEAM_STATE || {}));
+renderBoard(window.TEAM_STATE || {});
+setInterval(() => renderBoard(window.TEAM_STATE || {}), 10000);
+setInterval(reloadState, 30000);
+</script>
+</body>
+</html>

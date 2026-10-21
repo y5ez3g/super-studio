@@ -1,0 +1,14 @@
+{
+  "_note": "Checks run inside a temp worktree of the repo, so every script they call must be committed (team/ is not there). timeout is in seconds; enabled:false stages a check for later. protected = paths only their owner may change (for example a test harness that helpers must not edit); leave it empty when you own everything. binaryPattern is omitted on purpose, so gate.sh's default applies (fonts, audio, images, video and 3D model formats); add it only to widen or narrow that list. The gate is optional: edit per project, or don't use it.",
+  "_names": "Check names must be unique: results and covers are keyed by name, so gate.sh and run_checks.py reject a duplicate (exit 3). \"covers\" lists the spec ids a check proves.",
+  "_covers": "\"covers\" lists the acceptance ids a check proves, and the board shows each id's status from the last gate run. The generic smoke check below covers no id. The disabled completion check is an example of one that does: write its command, name the ids it proves, then set enabled to true.",
+  "main": "main",
+  "install": "npm ci",
+  "checks": [
+    {"name": "typecheck", "cmd": "npm run typecheck", "timeout": 300},
+    {"name": "build", "cmd": "npm run build", "timeout": 600},
+    {"name": "smoke", "cmd": "npm run smoke", "timeout": 900},
+    {"name": "completion", "cmd": "npm run completion", "timeout": 1800, "enabled": false, "covers": ["A1"]}
+  ],
+  "protected": []
+}

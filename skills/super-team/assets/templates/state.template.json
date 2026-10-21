@@ -1,0 +1,24 @@
+{
+  "updatedAt": null,
+  "startedAt": null,
+  "endsAt": null,
+  "roundsMax": null,
+  "phase": "planning",
+  "buildDoneAt": null,
+  "tl": {"nextWakeAt": null},
+  "plan": {
+    "approved": false,
+    "approvedAt": null,
+    "mode": "",
+    "headline": "",
+    "team": [],
+    "rules": []
+  },
+  "agents": [],
+  "timeline": [],
+  "quota": [],
+  "decisions": [],
+  "owner": {"signoff": false},
+  "needsYou": [],
+  "links": [{"label": "PLAN.md", "href": "PLAN.md"}]
+}
