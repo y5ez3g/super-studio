@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sundown Fold</title>
+    <meta name="description" content="A paper plane races the setting sun through a floating archipelago." />
+    <link rel="icon" href="data:," />
+    <script type="module" crossorigin src="./assets/index--cnxwPyV.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-CVtbTxPj.css">
+  </head>
+  <body>
+    <div id="app">
+      <div id="hud" class="hidden">
+        <div class="panel daylight" id="daylightPanel">
+          <svg class="sun" viewBox="0 0 34 34" aria-hidden="true">
+            <circle cx="17" cy="17" r="6.6" />
+            <g class="rays">
+              <line x1="17" y1="2" x2="17" y2="6.5" /><line x1="17" y1="27.5" x2="17" y2="32" />
+              <line x1="2" y1="17" x2="6.5" y2="17" /><line x1="27.5" y1="17" x2="32" y2="17" />
+              <line x1="6.4" y1="6.4" x2="9.6" y2="9.6" /><line x1="24.4" y1="24.4" x2="27.6" y2="27.6" />
+              <line x1="6.4" y1="27.6" x2="9.6" y2="24.4" /><line x1="24.4" y1="9.6" x2="27.6" y2="6.4" />
+            </g>
+          </svg>
+          <div class="label">DAYLIGHT</div>
+          <div class="track"><div class="fill" id="daylightFill"></div><div class="flash" id="daylightFlash"></div></div>
+          <div class="gains" id="gains"></div>
+        </div>
+        <div class="panel gates" id="gatesPanel"><span class="label">GATES</span><span class="count" id="gateCount">0/18</span></div>
+        <div id="chevron"><span id="chevNum"></span><svg viewBox="0 0 28 21" aria-hidden="true"><polyline points="3,4 14,16 25,4" /></svg></div>
+        <div id="missNote"></div>
+        <div id="neutral"></div>
+        <div id="reticle"><div class="ring"></div><div class="dot"></div></div>
+        <div id="hint"></div>
+      </div>
+
+      <div id="title" class="screen">
+        <h1>Sundown Fold</h1>
+        <p class="cta">Click to fly</p>
+        <p class="controls">Move the mouse to steer (or use the arrow keys) · Esc to pause</p>
+        <p class="best" id="titleBest"></p>
+      </div>
+
+      <div id="pause" class="screen hidden" role="dialog" aria-label="Paused">
+        <div class="pausePanel">
+          <h2>Paused</h2>
+          <button id="btnResume">Resume</button>
+          <button id="btnRestart">Restart</button>
+          <button id="btnInvert" aria-pressed="false">Invert pitch: <b>Off</b></button>
+          <button id="btnSound" aria-pressed="true">Sound: <b>On</b></button>
+          <p class="pauseHelp">Steer with the mouse, arrow keys or WASD</p>
+        </div>
+      </div>
+
+      <div id="postcard" class="screen hidden">
+        <div class="cardWrap"><canvas id="cardCanvas"></canvas></div>
+        <div class="cardActions">
+          <button id="btnAgain" class="primary">Fly again</button>
+          <button id="btnSave">Save postcard</button>
+        </div>
+      </div>
+
+      <div id="fade"></div>
+    </div>
+  </body>
+</html>

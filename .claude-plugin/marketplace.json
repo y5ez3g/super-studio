@@ -1,12 +1,12 @@
 {
-  "name": "super-studio",
+  "name": "superstudio",
   "owner": {
     "name": "Facade Code"
   },
-  "description": "super-studio: turn ideas into products, like a professional studio.",
+  "description": "superstudio: turn ideas into products, like a professional studio.",
   "plugins": [
     {
-      "name": "super-studio",
+      "name": "superstudio",
       "source": "./",
       "description": "super-pm (idea to product design) and super-team (product design to product) for Claude Code and Codex."
     }

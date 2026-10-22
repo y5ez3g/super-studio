@@ -1,0 +1,112 @@
+# Sundown Fold: art direction
+
+## Look
+- Source of the approved look: `concept/chosen.png`, the unchanged A selection, Amber Archipelago; the owner selected it with “just the letter.” (owner constraint)
+- Keep the paper plane, floating archipelago at golden hour, mouse steering, warm updrafts, glowing lantern gates and a flight that ends on a postcard of the route. (owner constraint)
+- Keep the desktop browser scope, with mouse, trackpad or keyboard, and one polished level lasting 2–5 minutes. (owner constraint)
+- The flight reads as a race against the sunset: gates buy daylight and dusk ends the flight. (approved experience goal)
+- Build an airy low-poly landscape of sunlit terracotta cliffs, muted grassy caps and lavender cloud shadows; the ivory folded plane and amber gate lights are the clearest foreground accents. (approved experience goal)
+- Angular island undersides contrast with broad soft cloud shapes; sparse pointed trees give scale, and distant islands soften into the sky rather than becoming a busy backdrop. (approved experience goal)
+- Preserve an open flying corridor between the foreground islands, with the next lantern gate readable against clouds and the following gates receding toward the sun. (approved experience goal)
+- Use Sundown Fold as the title; pursue graceful, floaty gliding with gentle urgency, soft penalties and a keepsake ending. (provisional design choice)
+- This document describes the approved golden-hour frame; extensions to rose light, violet dusk, menus, animation, feedback and the postcard below are proposals for playtesting. (provisional design choice)
+
+## References
+- N/A; the owner supplied no reference images. (owner constraint)
+
+## Palette
+- Upper golden-hour sky: `#ed9877`, sampled at image coordinate (640, 45); use as an appearance target rather than a material base colour. (implementation guess)
+- Sun disc: `#fef09f`, sampled at (888, 139); keep it lighter than the surrounding sky. (implementation guess)
+- Lit terracotta cliff: `#e37343`, sampled at (309, 504). (implementation guess)
+- Dark terracotta cliff: `#803c3f`, sampled at (119, 457). (implementation guess)
+- Sun-washed meadow cap: `#e1a84d`, sampled at (257, 343); shaded meadow cap: `#a3864a`, sampled at (111, 321); underlying muted sage is warmed strongly by the sunset. (implementation guess)
+- Distant island haze: `#b990a0`, sampled at (665, 337). (implementation guess)
+- Lit cloud: `#f6b99e`, sampled at (479, 415); shaded cloud: `#c89faf`, sampled at (850, 569). (implementation guess)
+- Paper wing: `#fed5b4`, sampled at (601, 474); folded inner shade: `#e8b696`, sampled at (583, 511); do not paint the plane this warm without accounting for light. (implementation guess)
+- Lantern core: `#fcf6ba`, sampled at (732, 241); lantern edge: `#fba82a`, sampled at (684, 267); daylight fill: `#fdc85c`, sampled at (171, 52). (implementation guess)
+- HUD backing appearance: `#a27974`, sampled at (201, 28); derive it from a translucent warm brown over the scene. (implementation guess)
+- Provisional dusk tuning targets: rose sky `#b87987`, upper violet sky `#615879`, lavender cliff shadow `#65536d`, cloud shadow `#8e7e9e`, and persistent warm lantern light `#ffd16b`; tune these together against a playable view. (implementation guess)
+
+## Shapes and shading
+- The plane is an unmistakable folded-paper dart with broad triangular wings, a raised centre crease, an illuminated top surface and a shaded inner fold; no character, cockpit or mechanical fittings. (approved experience goal)
+- Islands have broad polygonal meadow tops, stepped ledges and long tapered rock undersides, with a few detached rock shards underneath; trees are sparse faceted cones on simple trunks. (approved experience goal)
+- Gates are thin circular warm-metal hoops carrying small glowing box lanterns; the gate opening remains visually empty and its waypoint floats above it. (approved experience goal)
+- Use flat-shaded code-built terrain meshes, cone trees, low-poly stones, a ring mesh and box lanterns; share materials and instance repeated trees, lantern parts and loose rocks. (implementation guess)
+- Keep edge definition in lighting and faceting rather than adding heavy outlines; use matte diffuse surfaces, simple shadowing and no photographic surface detail. (provisional design choice)
+- Build cloud banks from shared broad low-poly lobes or layered procedural surfaces with gentle noise, distance fade and overlapping silhouettes; preserve the frame's visible cloud relief without volumetric rendering. (provisional design choice)
+- Put distant background islands and mountain-like horizon silhouettes in the scenery layer; they must not add collision obstacles or compete with the course gates. (provisional design choice)
+
+## Light and atmosphere
+- A low pale-yellow sun lights the islands warmly; their shadow sides remain terracotta or lavender, and cloud layers become progressively softer and lighter toward the horizon. (approved experience goal)
+- Gate lanterns, updraft ribbons and wingtip accents glow clearly, while rock, grass and paper remain matte and readable. (approved experience goal)
+- Start with a warm directional key from forward-right of the plane, a cool-lavender hemisphere fill, restrained contact shadows, distance fog and a sky gradient; these are inferred rendering methods, not properties established by the image. (implementation guess)
+- Starting light values: directional tint `#ffd0a0`, fill tint `#b4a4c8`, key elevation 8 deg; tune the key direction to keep the plane's top and selected rock faces sunlit. (implementation guess)
+- Starting post-processing values: bloom strength 0.35, radius 0.3 and threshold 0.9, exposure 1.0; use emissive masks or controlled values so only lanterns, ribbons and trails bloom noticeably. (implementation guess)
+- Use distance fog starting around 3 foreground-island depths and becoming dense around 10; choose the world distances after island and course scale are playable. (implementation guess)
+- As daylight falls, blend the existing gold light through dusty rose into violet; preserve the same island shapes, cloud separation, paper fold and open route rather than introducing a different art style. (provisional design choice)
+- At dusk, retain lavender ambient fill on the plane and nearby cliffs, hold lantern cores warm, and reduce distant contrast before reducing foreground visibility; the next gate, updraft boundary and nearby rock must remain readable. (provisional design choice)
+- Gate daylight gains lift the sun gently and recover a little warmth without a sudden full-scene colour jump; at dusk the disc slips behind the cloud horizon while lanterns continue glowing. (provisional design choice)
+
+## Camera and composition
+- Use the chase view behind and slightly above the plane, aimed along the flight corridor; the plane occupies lower centre, the active gate sits ahead of its nose, and islands frame the route from the sides. (approved experience goal)
+- Keep the sun and following gates visible in the distance, with enough empty sky and cloud around the active gate to read its shape. (approved experience goal)
+- Measurement basis: the approved source is exactly 1280×720 RGB; all bounds below were read from that bitmap and are approximate silhouette or ink bounds, not world geometry or CSS declarations. (implementation guess)
+- Plane silhouette, excluding light trails: approximately x=462–745 px and y=428–574 px, width 283 px and height 146 px; nose near (659, 428) px. (implementation guess)
+- Nearest gate including lantern bodies, excluding faint bloom: approximately x=640–814 px and y=226–418 px, width 174 px and height 192 px; projected centre near (727, 322) px. (implementation guess)
+- Next-gate chevron: approximately x=721–749 px and y=195–216 px, width 28 px and height 21 px; it remains separated from the top lantern. (implementation guess)
+- Visible sun cap: approximately x=824–950 px and y=100–175 px, width 126 px and visible height 75 px; the cloud horizon crosses around y=175 px, so this is not a measurement of the complete hidden disc. (implementation guess)
+- Left updraft's luminous ribbon body: approximately x=207–313 px and y=123–328 px, width 106 px and height 205 px; sparse detached sparkles extend above and around that body. (implementation guess)
+- Following gate silhouettes decrease to approximately 59×63 px, 35×42 px and 20×28 px; their order and decreasing size establish the flight direction. (implementation guess)
+- Begin camera tuning with a perspective vertical field of view of 55 deg; choose follow distance and height to reproduce the measured plane and gate proportions, because a single frame does not establish world scale. (implementation guess)
+- Let the camera lag behind steering and lean gently into a bank while holding a stable horizon; keep speed widening restrained so ordinary flight retains the approved framing. (provisional design choice)
+- At title, show the same plane resting on a launch cliff with open sunset space for the title; pause freezes the flight composition, and ending lifts the camera into an overhead transition toward the postcard. (provisional design choice)
+
+## Motion and effects
+- In the approved moment, thin amber wingtip trails sit behind the banked paper plane, and curling gold ribbons with sparse bright motes mark the warm updraft. (approved experience goal)
+- Steering visibly banks or pitches the plane and moves a restrained input reticle; show mouse and keyboard intent even inside the dead zone, using a softer neutral reticle when the plane is centred. (provisional design choice)
+- Keep the plane's motion springy but light: smooth bank entry and recovery, a gentle settling sink, and a small nose lift with longer ribbon-like trails when rising in an updraft. (provisional design choice)
+- Threading a gate briefly flares its lanterns, sends a small warm ring pulse outward, updates the gate count and daylight fill, floats the time gain above the meter, and moves the chevron to the next gate. (provisional design choice)
+- A centre thread adds a brighter cream core flash and a small burst of gold motes to the ordinary gate response; consecutive threads may strengthen the response without hiding the next gate. (provisional design choice)
+- Missing a gate visibly drains its lanterns into a muted rose state while the waypoint advances; distinguish visited gates from upcoming ones without changing the collision rules. (provisional design choice)
+- An updraft answers entry with brighter local ribbons, rising motes and visible lift; while the plane remains inside, retain the rising-mote cue, including when lift is limited by the height ceiling. (provisional design choice)
+- At the height ceiling, compress the upward input-reticle motion and briefly show a soft wind arc above the nose; redirect motes sideways so the loss of climb has a visible cause. (provisional design choice)
+- An island touch causes a small recoverable tumble, a few paper-coloured flecks and shortened trails as speed drops; a cloud dip raises a broad pale gust curl, lifts the plane back above the clouds and visibly subtracts daylight at the meter. (provisional design choice)
+- Keep feedback readable during rose and violet light, on repeated contacts and at low speed; refresh the appropriate local cue on every event without stacking opaque flashes. (provisional design choice)
+- Starting timing guesses: bank response 220 ms, camera position damping 320 ms, normal gate flare 450 ms, centre sparkle 650 ms, daylight-gain text 900 ms, missed-gate fade 500 ms, contact flecks 300 ms and cloud-gust curl 700 ms. (implementation guess)
+- Starting budgets: 8 lanterns on each ring as visible in the selected frame, 2 thin wingtip trails, at most 32 motes per nearby updraft and at most 12 motes in a gate burst; pool effects and tune densities in motion. (implementation guess)
+- At a final-arch ending, flare the lanterns and let the plane glide steadily as the camera takes over; at a dusk ending, lower the sun, retain warm lanterns and ease the plane into the same camera transition. (provisional design choice)
+- Remove steering cues when the ending camera takes control; introduce the overhead route gradually, then settle into the postcard without presenting a crash or failure screen. (provisional design choice)
+- Starting ending transition: 3 s for the camera lift and 600 ms for the postcard reveal; shorten if the keepsake feels delayed. (implementation guess)
+
+## UI and type
+- The flight HUD places a warm translucent daylight panel at upper left, a compact gates panel at upper right and a pale chevron above the active gate; text is clean, light and unobtrusive. (approved experience goal)
+- Keep product text in English and preserve the chase view as the primary flight presentation. (approved experience goal)
+- Measured daylight panel: approximately x=24–291 px and y=20–69 px, width 267 px and height 49 px; corner radius appears near 9 px. (implementation guess)
+- Measured daylight label ink: approximately x=77–155 px and y=29–42 px; sun icon including rays: approximately x=34–67 px and y=26–61 px, width 33 px and height 35 px. (implementation guess)
+- Measured meter track: approximately x=77–277 px and y=48–58 px, width 200 px and height 10 px; its visible filled portion is approximately 141 px long in this moment. (implementation guess)
+- Measured gates panel: approximately x=1098–1256 px and y=20–62 px, width 158 px and height 42 px; its visible “GATES 7/18” ink spans approximately x=1113–1241 px and y=32–50 px. (implementation guess)
+- Use the system stack `ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`; no downloaded fonts. Match the measured text-ink bounds rather than treating them as font-size declarations. (provisional design choice)
+- Keep the flight labels uppercase as shown, use regular or medium weight, and leave the sun icon, meter and numeral visually stronger than panel decoration. (provisional design choice)
+- Anchor the HUD to the viewport corners and scale from the measured composition for larger desktop windows; keep text crisp and controls reachable without scaling the scene into a flat image. (provisional design choice)
+- Title screen: place “Sundown Fold” in the open sky above the launch plane, followed by “Click to fly,” “Move the mouse to steer · Esc to pause,” and the local best; reuse warm cream text and restrained brown translucent backing. (provisional design choice)
+- Pause screen: dim the frozen flight gently with a warm translucent veil; a single compact panel offers Resume, Restart, Invert pitch and Sound, with explicit On/Off states and visible pointer hover, keyboard focus and press feedback. (provisional design choice)
+- Losing window focus opens the same pause presentation; Resume returns to the preserved flight, Restart visibly fades into the launch, and toggles change their text and selected appearance immediately. (provisional design choice)
+- Ending presentation: clear flight HUD and input reticle as camera control begins; let the warm or violet scene carry the transition without a score splash blocking the plane. (provisional design choice)
+- Postcard: use a warm ivory landscape card with a thin terracotta edge, an overhead rendering of the same faceted islands and simplified cloud shapes, and a code-drawn sun-and-paper-plane stamp; keep broad empty margins so it reads as a keepsake. (provisional design choice)
+- Ink the actual flown route as a muted plum dashed line; threaded gates are warm filled marks, missed gates are faded hollow marks, and the final plane marker closes the route. Do not substitute an ideal course line for the recorded flight. (provisional design choice)
+- Beside the map, show gates threaded, centre threads, flight time, distance and daylight left with clearly labelled local best values; use the same system type with sentence-case labels and easy-to-compare numerals. (provisional design choice)
+- “Fly again” is the postcard's clear action and starts a new flight with a short warm fade; hover, focus and pressed states remain visible. If postcard saving or a best-route ghost is included, keep each secondary to the run's map and main action. (provisional design choice)
+
+## Audio mood
+- Warm, airy, wistful; use browser-synthesised pads, a soft speed-responsive wind bed and gentle pentatonic lantern chimes. (provisional design choice)
+- Starting musical tempo: 68 BPM; leave space around each gate chime rather than creating an insistent beat. (implementation guess)
+- Match the visible responses with a higher centre-thread sparkle, a muted missed-gate note, an updraft whoosh, a ceiling wind hush, a soft paper crinkle on contact, a cloud gust, a dusk bell and a postcard stamp thud; Sound Off keeps all visual feedback intact. (provisional design choice)
+
+## Avoid
+- No owner dislikes were stated. (owner constraint)
+- Avoid photographic terrain, realistic foliage, volumetric clouds or light shafts, dense unique scenery, heavy surface textures and anything suggesting downloaded models or materials. (provisional design choice)
+- Avoid black crushed cliff shadows, pure-white blown-out clouds, opaque screen-wide gate flashes and dense sparkles that hide the next gate or plane folds. (provisional design choice)
+- Avoid heavy cartoon outlines, hard neon-magenta lighting and glossy plastic materials; these would replace the approved warm matte facets with a different look. (provisional design choice)
+- Avoid filling the central flight corridor with islands, shrinking the plane until its paper fold is unreadable, or hiding upcoming gates behind interface panels. (provisional design choice)
+- Avoid abrupt camera shakes, repeated full-screen penalty flashes, sharp failure stings, crash screens or a dusk state too dark to steer through. (provisional design choice)
+- Avoid turning the postcard into a debug minimap, a dense leaderboard or an unrelated illustrated landscape; it must retain the flown archipelago and the player's actual route. (provisional design choice)

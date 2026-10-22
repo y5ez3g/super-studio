@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#d88b72" />
+  <meta name="description" content="A paper plane. Eighteen lanterns. One last sunset. Fly through the Ember Isles and bring home a postcard of your journey." />
+  <title>Sundown Fold · A flight through the Ember Isles</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23d78664'/%3E%3Cpath d='M9 29 54 12 35 54 29 36Z' fill='%23fff0d2'/%3E%3Cpath d='m29 36 25-24-20 29' fill='%23c89576'/%3E%3C/svg%3E" />
+  <script type="module" crossorigin src="./assets/index-DfHGQ_IW.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-BbwMbE7V.css">
+</head>
+<body>
+  <canvas id="game" aria-label="Sundown Fold, a paper plane flight through floating sunset islands"></canvas>
+  <div id="vignette"></div>
+  <main id="ui">
+    <section id="title-screen" class="screen title-screen" aria-labelledby="game-title">
+      <div class="title-top"><span class="tiny-mark">SF</span><span>A LITTLE FLIGHT, A LASTING MEMORY</span><span class="edition">EMBER ISLES · VOL. 01</span></div>
+      <div class="title-copy">
+        <p class="eyebrow"><span></span> A FLIGHT THROUGH THE EMBER ISLES <span></span></p>
+        <h1 id="game-title">Sundown <em>Fold</em></h1>
+        <p class="tagline">Race the sunset. Bring home the light.</p>
+      </div>
+      <div class="launch-actions">
+        <button id="launch" class="primary">Click to fly <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 11 16-7-7 16-2-7Z"/><path d="m11 13 9-9"/></svg></button>
+        <p class="controls">Move the mouse to steer <span>·</span> Esc to pause</p>
+        <p class="keyboard-note">WASD or arrow keys also work</p>
+        <p id="title-best" class="title-best">Eighteen lanterns. One last sunset.</p>
+      </div>
+      <div class="title-bottom"><span>FOLD A MOMENT INTO A MEMORY.</span><button id="title-sound" class="text-button">Sound on <span>♪</span></button></div>
+    </section>
+    <section id="hud" class="hidden" aria-label="Flight information">
+      <div class="daylight-panel glass"><svg class="sun-icon" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="8"/><path d="M20 2v6m0 24v6M2 20h6m24 0h6M7.3 7.3l4.2 4.2m17 17 4.2 4.2m0-25.4-4.2 4.2m-17 17-4.2 4.2"/></svg><div class="meter-content"><div class="meter-heading"><span>DAYLIGHT</span><span id="daylight-seconds">75s</span></div><div class="meter-track"><div id="daylight-fill"></div></div></div><div id="daylight-gain"></div></div>
+      <div class="gates-panel glass"><span>GATES</span><strong id="gates-count">0<span>/18</span></strong><button id="pause-button" aria-label="Pause flight" title="Pause (Esc)"><i></i><i></i></button></div>
+      <div id="waypoint"><svg viewBox="0 0 32 24" aria-hidden="true"><path d="m5 6 11 12L27 6"/></svg><span id="waypoint-label"></span></div>
+      <div id="reticle"><span></span><i></i></div>
+      <div id="ceiling-cue"><svg viewBox="0 0 100 30" aria-hidden="true"><path d="M5 24Q50-14 95 24M18 27Q50 1 82 27"/></svg><span>THIN AIR</span></div>
+      <div id="flight-message" role="status"><strong></strong><span></span></div>
+      <div id="flight-hint"><span class="hint-line"></span><p>Thread the lanterns to buy back daylight.<small>Dive for speed. Ride the golden air to climb.</small></p></div>
+      <div class="flight-footer"><span id="course-label">EMBER ISLES</span><span id="flight-distance">0 m</span><span id="updraft-label"></span></div>
+    </section>
+    <section id="pause-screen" class="screen modal-screen hidden" aria-labelledby="pause-title">
+      <div class="pause-card"><p class="eyebrow">THE SUN CAN WAIT</p><h2 id="pause-title">A moment<br/><em>in the air.</em></h2><p class="pause-description">Your flight is right where you left it.</p><button id="resume" class="primary">Resume flight <span>↗</span></button><button id="restart" class="secondary">Start a new flight</button><div class="settings"><button id="invert" aria-pressed="false"><span>Invert pitch</span><span class="setting-value">Off</span></button><button id="sound" aria-pressed="true"><span>Sound</span><span class="setting-value">On</span></button></div><p class="pause-controls">Mouse / WASD / arrows to steer<br/>Esc or P to pause · Space to resume</p></div>
+    </section>
+    <section id="ending-screen" class="screen hidden"><div class="ending-copy"><p class="eyebrow">THE EMBER ISLES</p><h2 id="ending-title">The last light is yours.</h2><p id="ending-subtitle">A little flight, folded into a memory.</p></div></section>
+    <section id="postcard-screen" class="screen hidden" aria-labelledby="postcard-title"><div class="postcard-heading"><p class="eyebrow">A LITTLE SOMETHING TO REMEMBER</p><h2 id="postcard-title">Wish you were <em>air.</em></h2></div><div class="postcard"><canvas id="postcard-canvas" width="1600" height="900" aria-label="Postcard of the Ember Isles with your flown route and flight statistics"></canvas></div><div class="postcard-actions"><button id="fly-again" class="primary">Fly again <span>↗</span></button><button id="save-postcard" class="secondary">Save postcard <span>↓</span></button></div><p class="postcard-footnote">Your best flight stays in this browser.</p></section>
+    <section id="unsupported" class="screen hidden"><h2>A little more sky, please.</h2><p>Sundown Fold needs a desktop browser with WebGL 2.<br/>Open it on a laptop or desktop to take flight.</p></section>
+  </main>
+  <div id="fade"></div>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brinewick</title>
+    <meta name="description" content="A cozy harbor-town builder: click the sea, and the town shapes itself around what you build." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2335b1c3'/%3E%3Cpath d='M8 22h16v-7l-8-6-8 6z' fill='%23fbe7c4'/%3E%3Cpath d='M6 15l10-8 10 8' fill='none' stroke='%23f08a48' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+    <script type="module" crossorigin src="./assets/index-DZli8OMH.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-DXjX3C8P.css">
+  </head>
+  <body>
+    <canvas id="scene" aria-label="The bay"></canvas>
+    <div id="ui">
+      <div id="title" class="screen">
+        <div class="title-art" id="title-art"></div>
+        <div class="start">Click to start</div>
+        <button id="title-sound" class="chip" type="button" aria-pressed="true">
+          <span class="ico"></span><span class="lbl">Sound on</span>
+        </button>
+      </div>
+
+      <div id="hud" class="hidden">
+        <div id="hint">Click the sea to build</div>
+        <div id="tray" role="list" aria-label="Discoveries"></div>
+        <div id="corner">
+          <button id="undo" class="disk" type="button" aria-label="Undo" title="Undo (Ctrl+Z)">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 7.5 5.5 11.5l4 4" /><path d="M6 11.5h7.5a4.5 4.5 0 0 1 0 9H11" /></svg>
+          </button>
+          <button id="snap" class="disk" type="button" aria-label="Take a postcard" title="Take a postcard (P)">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path class="fill" d="M8.6 5.2 7.4 7H5.2A2.2 2.2 0 0 0 3 9.2v8.6A2.2 2.2 0 0 0 5.2 20h13.6a2.2 2.2 0 0 0 2.2-2.2V9.2A2.2 2.2 0 0 0 18.8 7h-2.2l-1.2-1.8z" /><circle class="lens" cx="12" cy="13.2" r="3.6" /></svg>
+          </button>
+        </div>
+        <button id="mute" class="disk tiny" type="button" aria-label="Sound" title="Sound (M)"></button>
+      </div>
+
+      <div id="flash"></div>
+      <div id="announce" class="sr-only" aria-live="polite"></div>
+
+      <div id="postcard" class="screen hidden">
+        <div class="card-wrap"><img id="card-img" alt="Your harbor as a postcard" /></div>
+        <div class="actions">
+          <button id="keep" class="pill primary" type="button">Keep building</button>
+          <button id="save" class="pill" type="button">Save image</button>
+          <button id="newbay" class="pill" type="button">New bay</button>
+        </div>
+        <div id="confirm" class="hidden" role="dialog" aria-label="Start a new bay">
+          <p>Clear the bay and start again?</p>
+          <div class="row">
+            <button id="confirm-no" class="pill primary" type="button">Keep my harbor</button>
+            <button id="confirm-yes" class="pill" type="button">Clear the bay</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
